@@ -3,7 +3,7 @@
 git clone git@github.com:xkw666/Ocean_test.git
 ```
 
-进入对应目录qa 或者 vqa
+进入对应目录 qa 或者 vqa
 ```shell
 cd qa
 ```
