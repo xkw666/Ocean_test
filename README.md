@@ -1,6 +1,7 @@
 克隆仓库
 ```shell
 git clone git@github.com:xkw666/Ocean_test.git
+cd Ocean_test
 ```
 
 进入对应目录 qa 或者 vqa
