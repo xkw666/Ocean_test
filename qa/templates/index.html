@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- 顶部标题 + 按钮 -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">QA 标注</h2>
+  <div>
+    <!-- 新增清空按钮 -->
+    <button id="clearButton" class="btn btn-danger me-2">清空所有选择</button>
+    <!-- 查看数据库条目 -->
+    <a href="{{ url_for('answers_page') }}" class="btn btn-outline-info me-2">查看已保存答案</a>
+    <!-- 导出 CSV -->
+    <a href="{{ url_for('download_csv') }}" class="btn btn-success">提交并下载 CSV</a>
+  </div>
+</div>
+
+<!-- 题目循环 -->
+{% for q in questions %}
+  <div class="card my-3">
+    <div class="card-header">
+      {{ loop.index }}. {{ q.question }}
+    </div>
+
+    <div class="card-body">
+
+      <div >
+        <a href="{{ url_for('pdf_link', title=q.pdf_title) }}" target="_blank">
+          {{ q.pdf_title }}
+        </a>
+      </div>
+      <br> <!-- Adds an empty line -->
+      {# ---------- 选项：横排 + 自动保存 & 回显 ---------- #}
+      <div class="d-flex flex-wrap justify-content-start gap-4">
+        {% for key, text in q.options.items() %}
+          <div class="form-check mb-3">  <!-- 添加了底部间距 -->
+            <input class="form-check-input auto-save"
+                  type="radio"
+                  name="q_{{ q.question_id }}"
+                  id="q{{ q.question_id }}_{{ key }}"
+                  value="{{ key }}"
+                  data-qid="{{ q.question_id }}"
+                  data-choice="{{ key }}"
+                  {% if answers.get(q.question_id) == key %}checked{% endif %}> <!-- 判断答案是否相同，若相同则设置 checked -->
+            <label class="form-check-label"
+                  for="q{{ q.question_id }}_{{ key }}">
+              {{ key }}. {{ text }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+
+
+
+    </div>
+  </div>
+{% endfor %}
+
+<!-- 自动保存脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const url = "{{ url_for('autosave') }}";
+
+  document.querySelectorAll('.auto-save').forEach(el => {
+    el.addEventListener('change', () => {
+      fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          question_id: el.dataset.qid,
+          choice:      el.dataset.choice,
+          ts:          Date.now()                 // 毫秒时间戳
+        })
+      }).catch(console.error);
+    });
+  });
+
+  // 清空所有选择按钮事件
+  document.getElementById('clearButton').addEventListener('click', () => {
+    if (confirm("你确定要清空所有选择吗？")) {
+      fetch("{{ url_for('clear_answers') }}", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "ok") {
+          alert("所有选择已清空！");
+          location.reload();  // 刷新页面，清空后自动更新显示
+        }
+      })
+      .catch(console.error);
+    }
+  });
+});
+</script>
+
+{% endblock %}

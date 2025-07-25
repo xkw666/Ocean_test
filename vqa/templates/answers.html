@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="my-4">已保存答案 (共 {{ count }} 题)</h2>
+
+<!-- 已回答的答案表格 -->
+<table class="table table-striped">
+  <thead>
+    <tr><th>question_id</th><th>choice</th><th>saved_at</th></tr>
+  </thead>
+  <tbody>
+    {% for qid, choice, ts in rows %}
+      <tr>
+        <td>{{ qid+1 }}</td>
+        <td>{{ choice }}</td>
+        <td>{{ ts }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- 显示未回答的题目 -->
+<h3 class="my-4">未回答的题目 (共 {{ unanswered_count }} 题)</h3>
+{% if unanswered_count > 0 %}
+  <ul>
+    {% for qid in unanswered %}
+      <li>题号: {{ qid+1 }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>你已经回答了所有题目！</p>
+{% endif %}
+
+<a href="{{ url_for('index') }}" class="btn btn-secondary">返回题目</a>
+{% endblock %}
